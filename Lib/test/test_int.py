@@ -790,6 +790,20 @@ class PyLongModuleTests(unittest.TestCase):
             msg = r"tuple of length 2 is required from int_divmod\(\)"
             self.assertRaisesRegex(ValueError, msg, divmod, a, b)
 
+    @support.cpython_only  # tests implementation details of CPython.
+    @unittest.skipUnless(_pylong, "_pylong module required")
+    def test_pylong_int_mod(self):
+        # Regression test for https://github.com/python/cpython/issues/160050.
+        k = 10_000
+        a, b = (1 << (2 * k)) + 5, (1 << k)
+        with mock.patch.object(_pylong, "int_divmod",
+                               wraps=_pylong.int_divmod) as mock_int_divmod:
+            self.assertEqual(a % b, 5)
+            self.assertEqual(-a % b, b - 5)
+            self.assertEqual(a % -b, 5 - b)
+            self.assertEqual(-a % -b, -5)
+        mock_int_divmod.assert_called()
+
     def test_pylong_str_to_int(self):
         v1 = 1 << 100_000
         s = str(v1)

@@ -1,0 +1,2 @@
+Speed up the ``%`` operator for very large :class:`int` operands by using
+the same asymptotically faster algorithm as ``//`` and :func:`divmod`.
